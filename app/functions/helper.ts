@@ -3,18 +3,27 @@ import { generateMnemonic, mnemonicToSeed } from "bip39"
 import { derivePath } from "ed25519-hd-key";
 import nacl from "tweetnacl";
 import { Wallet, HDNodeWallet } from "ethers";
+import bs58 from "bs58";
 
 export function generateMnemonicFunction() {
     return generateMnemonic();
 }
 
 export function storeSeed(seed: string) {
-    localStorage.setItem("seed", seed);
+    const encoded = bs58.encode(Buffer.from(seed, "utf-8"));
+    localStorage.setItem("seed", encoded);
 }
 
 export function getSeed() {
-    const seed = localStorage.getItem('seed');
-    return seed;
+    const encoded = localStorage.getItem("seed");
+
+    if (!encoded) return null;
+
+    try {
+        return Buffer.from(bs58.decode(encoded)).toString("utf-8");
+    } catch {
+        return null;
+    }
 }
 
 export function deleteSeed() {
